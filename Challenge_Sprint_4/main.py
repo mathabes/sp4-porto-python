@@ -1,35 +1,37 @@
 from lib.subalgoritmos import *
-from lib.requests import *
+from lib.conexoes import *
 import os
 from time import sleep
 
-funcionalidades = ['Ver/Cadastrar dados pessoais', 'Ver/Cadastrar dados da bike', 'Ver/Selecionar plano', 'Fechar o programa']
+funcionalidades = ['Ver/Cadastrar dados pessoais', 'Ver/Cadastrar dados da bike', 'Ver/Selecionar plano',
+                   'Fechar o programa']
 dados = {
-    'Dados Pessoais': 
-    {
-        'Nome': "", 
-        'Email': "", 
-        'Telefone': "", 
-        'CPF': "",
-        'CEP': ""
-    },
-    'Dados Bike': 
-    {
-        'Marca': "", 
-        'Modelo': "", 
-        'Chassi': "", 
-        'Valor': 0.0
-    },
+    'Dados Pessoais':
+        {
+            'Nome': "",
+            'Email': "",
+            'Telefone': "",
+            'CPF': "",
+            'CEP': ""
+        },
+    'Dados Bike':
+        {
+            'Marca': "",
+            'Modelo': "",
+            'Chassi': "",
+            'Valor': 0.0
+        },
     'Endereco': {}
 }
 acessorio = {
-    'Tipo do acessório': "", 
+    'Tipo do acessório': "",
     'Marca do acessório': "",
-    'Modelo do acessório': "", 
+    'Modelo do acessório': "",
     'Preço do acessório': 0.0
 }
 quant_acessorio = 0
 opc_plano = 0
+escolha_alterar = "N"
 plano_selecionado = ""
 alterar_plano = ""
 d_pessoais_cadastrados = False
@@ -62,22 +64,43 @@ while True:
                 dados['Endereco'] = viacep_api(dados['Dados Pessoais']['CEP'])
                 insert_bd('endereco', dados['Endereco'])
 
-                dados['Dados Pessoais'] = confirmar_dados('DADOS PESSOAIS', dados['Dados Pessoais'])
-                dados['Endereco'] = confirmar_dados('ENDEREÇO', dados['Endereco'])
+                while escolha_alterar == 'N':
+                    dados['Dados Pessoais'], escolha_alterar, opc_alterar, novo_dado = confirmar_dados('DADOS PESSOAIS', dados['Dados Pessoais'])
+                    if novo_dado != '':
+                        update_bd('cliente', opc_alterar, novo_dado)
+                escolha_alterar = 'N'
+                while escolha_alterar == 'N':
+                    dados['Endereco'], escolha_alterar, opc_alterar, novo_dado = confirmar_dados('ENDEREÇO', dados['Endereco'])
+                    if novo_dado != '':
+                        update_bd('endereco', opc_alterar, novo_dado)
+                escolha_alterar = 'N'
                 d_pessoais_cadastrados = True
                 cabecalho("Cadastro de dados pessoais finalizado!!!")
-            
+
             # Caso o cliente já tenha digitado seus dados, ele pode alterá-los ao entrar nesta área novamente
             else:
-                dados['Dados Pessoais'] = confirmar_dados('DADOS PESSOAIS', dados['Dados Pessoais'])
-                dados['Endereco'] = confirmar_dados('ENDEREÇO', dados['Endereco'])
+                while escolha_alterar == 'N':
+                    dados['Dados Pessoais'], escolha_alterar, opc_alterar, novo_dado = confirmar_dados('DADOS PESSOAIS', dados['Dados Pessoais'])
+                    if novo_dado != '':
+                        update_bd('cliente', opc_alterar, novo_dado)
+                escolha_alterar = 'N'
+                while escolha_alterar == 'N':
+                    dados['Endereco'], escolha_alterar, opc_alterar, novo_dado = confirmar_dados('ENDEREÇO', dados['Endereco'])
+                    if novo_dado != '':
+                        update_bd('cliente', opc_alterar, novo_dado)
+                escolha_alterar = 'N'
 
         # Cadastro de dados da bike
         case 2:
             if not d_bike_cadastrados:
                 dados['Dados Bike'] = cadastro_geral('DADOS BIKE', dados['Dados Bike'])
                 insert_bd('bike', dados['Dados Bike'])
-                dados['Dados Bike'] = confirmar_dados('DADOS BIKE', dados['Dados Bike'])
+                
+                while escolha_alterar == 'N':
+                    dados['Dados Bike'], escolha_alterar, opc_alterar, novo_dado = confirmar_dados('DADOS BIKE', dados['Dados Bike'])
+                    if novo_dado != '':
+                        update_bd('bike', opc_alterar, novo_dado)
+                escolha_alterar = 'N'
 
                 # Cadastro dos possíveis acessórios da bike
                 while True:
@@ -92,19 +115,31 @@ while True:
                         dados[f'Acessório {i + 1}'] = acessorio
                         dados[f'Acessório {i + 1}'] = cadastro_geral(f'ACESSÓRIO {i + 1}', dados[f'Acessório {i + 1}'])
                         insert_bd('acessorio', dados[f'Acessório {i + 1}'])
-                        dados[f'Acessório {i + 1}'] = confirmar_dados(f'ACESSÓRIO {i + 1}', dados[f'Acessório {i + 1}'])
+                        while escolha_alterar == 'N':
+                            dados[f'Acessório {i + 1}'], escolha_alterar, opc_alterar, novo_dado = confirmar_dados(f'ACESSÓRIO {i + 1}', dados[f'Acessório {i + 1}'])
+                            if novo_dado != '':
+                                update_bd('acessorio', opc_alterar, novo_dado)
+                        escolha_alterar = 'N'
                 if possui_acessorio.upper() == 'N':
                     os.system("cls")
-                d_bike_cadastrados = True    
+                d_bike_cadastrados = True
                 cabecalho("Cadastro de dados da bike finalizado!!!")
-            
+
             # Permite ao cliente alterar estes dados ao entrar novamente
             else:
-                dados['Dados Bike'] = confirmar_dados('DADOS BIKE', dados['Dados Bike'])
+                while escolha_alterar == 'N':
+                    dados['Dados Bike'], escolha_alterar, opc_alterar, novo_dado = confirmar_dados('DADOS BIKE', dados['Dados Bike'])
+                    if novo_dado != '':
+                        update_bd('bike', opc_alterar, novo_dado)
+                escolha_alterar = 'N'
                 if quant_acessorio != 0:
                     for i in range(quant_acessorio):
-                        dados[f'Acessório {i + 1}'] = confirmar_dados(f'ACESSÓRIO {i + 1}', dados[f'Acessório {i + 1}'])
-        
+                        while escolha_alterar == 'N':
+                            dados[f'Acessório {i + 1}'], escolha_alterar, opc_alterar, novo_dado = confirmar_dados(f'ACESSÓRIO {i + 1}', dados[f'Acessório {i + 1}'])
+                            if novo_dado != '':
+                                update_bd('acessorio', opc_alterar, novo_dado)
+                        escolha_alterar = 'N'
+
         # Selecionar plano da bike
         case 3:
             while True:
@@ -158,7 +193,7 @@ nível.
                             break
                         case _:
                             exibir_invalido()
-                
+
                 # Permite ao usuário redefinir seu plano
                 else:
                     cabecalho(f"{plano_selecionado} selecionado.")
@@ -177,8 +212,8 @@ nível.
 
             os.system('cls')
             if plano_selecionado != "":
-                        cabecalho(f"{plano_selecionado} selecionado!!!")
-        
+                cabecalho(f"{plano_selecionado} selecionado!!!")
+
         # Finaliza o programa
         case 4:
 
@@ -206,7 +241,7 @@ nível.
                 sleep(0.7)
             else:
                 dados_restantes.append('Selecionar plano')
-            
+
             # Caso o usuário tenha realizado todos os processos, a contratação será concluída
             if d_pessoais_cadastrados and d_bike_cadastrados and plano_selecionado != "":
                 cabecalho("Contratação do seguro concluída!!!")
@@ -237,3 +272,4 @@ nível.
             exibir_invalido()
 cabecalho("Finalizando programa...")
 cabecalho("Desenvolvido por: CycleX")
+
