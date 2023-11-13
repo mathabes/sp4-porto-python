@@ -112,7 +112,7 @@ while True:
                 if possui_acessorio.upper() == 'S':
                     quant_acessorio = int(tratar_erro_num("Quantos?: "))
                     for i in range(quant_acessorio):
-                        dados[f'Acessório {i + 1}'] = acessorio
+                        dados[f'Acessório {i + 1}'] = acessorio.copy()
                         dados[f'Acessório {i + 1}'] = cadastro_geral(f'ACESSÓRIO {i + 1}', dados[f'Acessório {i + 1}'])
                         insert_bd('acessorio', dados[f'Acessório {i + 1}'])
                         while escolha_alterar == 'N':
@@ -245,6 +245,18 @@ nível.
             # Caso o usuário tenha realizado todos os processos, a contratação será concluída
             if d_pessoais_cadastrados and d_bike_cadastrados and plano_selecionado != "":
                 cabecalho("Contratação do seguro concluída!!!")
+                with open(f'{dados["Dados Pessoais"]["Nome"]}.txt', 'a', encoding='utf-8') as arq:
+                    for cadastros in dados.keys():
+                        arq.write(linha(50) + '\n')
+                        arq.write(cadastros.center(50) + '\n')
+                        arq.write(linha(50) + '\n')
+                        for k, v in dados[cadastros].items():
+                            if k.find('Valor') != -1 or k.find('Preço') != -1:
+                                arq.write(f"{k}: R$ {v:.2f}\n")
+                            else:
+                                arq.write(f"{k}: {v}\n")
+                        arq.write(linha(50) + '\n')
+                cabecalho(f"Arquivo {dados['Dados Pessoais']['Nome']}.txt criado!!")
                 break
 
             # Caso contrário, o usuário será informado dos dados faltantes

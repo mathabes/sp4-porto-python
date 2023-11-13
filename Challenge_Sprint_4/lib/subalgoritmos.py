@@ -55,7 +55,7 @@ def confirmar_dados(tipo_cadastro, d: dict) -> dict:
             valores.append(f"{k}: {v}")
     print(linha(50))
     while True:
-        alterar = input("Confirme seus dados ['S' para continuar || 'N' para alterar]: ")
+        alterar = input("Suas informações estão corretas? Digite 'S' para sim ou 'N' para não: ")
         if alterar.upper() == 'S' or alterar.upper() == 'N':
             break
         else:
@@ -82,8 +82,13 @@ def confirmar_dados(tipo_cadastro, d: dict) -> dict:
         for k in d.keys():
             cont += 1
             if opc_alterar == cont:
-                d[k] = validacoes(k)
-                nv_dado = d[k]
+                if k == 'CEP':
+                    nv_dado = ''
+                    print("\033[031m--> Infelizmente, não é possível alterar o CEP.\033[m\n")
+                    input('Pressione ENTER para continuar')
+                else:
+                    d[k] = validacoes(k)
+                    nv_dado = d[k]
     if alterar.upper() == "S":
         os.system("cls")
         nv_dado = ''
@@ -136,6 +141,8 @@ def validacoes(dado) -> None:
     elif dado == "Número":
         numero = tratar_erro_num("Número: ")
         return numero
+    elif dado == 'Telefone':
+        return validar_telefone()
     else:
         while True:
             valor = input(f"{dado}: ")
@@ -221,3 +228,24 @@ def validar_cpf():
                 else:
                     print("\033[031m--> ERRO: CPF inválido.\033[m\n")
     return cpf
+def validar_telefone():
+    caracteres_validos = '0123456789 )(-'
+    numeros = '0123456789'
+    validacao = False
+    telefone_numeros = ''
+    while not validacao:
+        telefone = input("Telefone (XX) XXXXX-XXXX: ")
+        validacao = True
+        for x in telefone:
+            if x not in caracteres_validos:
+                validacao = False
+                print("\033[031m--> ERRO: Por favor, digite apenas números ou caracteres válidos.\033[m\n")
+                break
+        for t in telefone:
+            for n in numeros:
+                if t == n:
+                    telefone_numeros += t
+        if len(telefone_numeros) < 10:
+            validacao = False
+            print("\033[031m--> ERRO: Digite um telefone válido.\033[m\n")
+    return telefone
